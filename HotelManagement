@@ -1,0 +1,134 @@
+import java.util.*;
+
+public class HotelManagement {
+    // Room availability
+    private static int standardRoomAvailability = 20;
+    private static int deluxeRoomAvailability = 32;
+    private static int familyRoomAvailability = 5;
+    private static int suiteAvailability = 15;
+    private static int executiveRoomAvailability = 18;
+
+    // Room price
+    private static int standardRoomPrice = 150;
+    private static int deluxeRoomPrice = 250;
+    private static int familyRoomPrice = 350;
+    private static int suitePrice = 600;
+    private static int executiveRoomPrice = 150;
+
+    // Set staff password
+    private static final String Staff_password = "ADMIN654710";
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+
+        int loginChoice;
+        do {
+            System.out.println("Welcome to our Hotel!");
+            System.out.println("Please login: ");
+            System.out.println("[1]Customer Login.");
+            System.out.println("[2]Staff Login.");
+            System.out.println("[0]Exit");
+            System.out.print("Please choose an option: ");
+            loginChoice = sc.nextInt();
+            sc.nextLine(); //next line
+
+            if (loginChoice == 1) {
+                customerMenu(sc); //go to customer menu
+            } else if (loginChoice == 2) {
+                if (staffLoginPassword(sc)) {
+                    staffMenu(sc); // Add functionality for staff menu
+                } else {
+                    System.out.println("Invalid staff password. Access failed.");
+                }
+            } else if(loginChoice == 0){
+                System.out.println("Goodbye! Thanks for using our system!");
+                return;
+            } else {
+                System.out.println("Invalid choice. Please enter your option again.");
+            }
+        } while (loginChoice < 1 || loginChoice > 2);
+
+        sc.close(); // Close the scanner
+    }
+
+    // Staff login with password check
+    public static boolean staffLoginPassword(Scanner sc){
+        System.out.print("Enter staff password: ");
+        String enteredPassword = sc.nextLine();
+
+        return enteredPassword.equals(Staff_password);
+    }
+
+    // Customer menu
+    public static void customerMenu(Scanner sc){
+        while(true){
+            System.out.println("============================Customer Menu============================");
+            System.out.println("[1]View Room Type");
+            System.out.println("[2]View Room Availability");
+            System.out.println("[3]Book a room");
+            System.out.println("[4]View my booking");
+            System.out.println("[5]Check-in");
+            System.out.println("[6]Check-out");
+            System.out.println("[0]Exit");
+            System.out.print("Choose an option: ");
+            int choice = sc.nextInt();
+            sc.nextLine(); //nextline
+
+            switch(choice){
+                case 1:
+                    viewRoomType(sc);
+                    break;
+                case 2:
+                    viewRoomAvailability(sc);
+                    break;
+                case 3:
+                    bookRoom(sc);
+                    break;
+                case 4:
+                    viewBooking(sc);
+                    break;
+                case 5:
+                    checkIn(sc);
+                    break;
+                case 6:
+                    checkOut(sc);
+                    break;
+                case 0:
+                    System.out.println("Goodbye! Thanks for using our system!");
+                    return; // Exit system
+                default:
+                    System.out.println("Invalid option. Please try again");
+            }
+        }
+    }
+
+    // Placeholder methods for customer actions
+    public static void viewRoomType(Scanner sc){
+        System.out.println("Here are the available room types...");
+    }
+
+    public static void viewRoomAvailability(Scanner sc){
+        System.out.println("Here is the room availability...");
+    }
+
+    public static void bookRoom(Scanner sc){
+        System.out.println("Proceeding to book a room...");
+    }
+
+    public static void viewBooking(Scanner sc){
+        System.out.println("Viewing your booking...");
+    }
+
+    public static void checkIn(Scanner sc){
+        System.out.println("Checking you in...");
+    }
+
+    public static void checkOut(Scanner sc){
+        System.out.println("Checking you out...");
+    }
+
+    // Placeholder for staff menu (implement when required)
+    public static void staffMenu(Scanner sc) {
+        System.out.println("Staff Menu (to be implemented)...");
+    }
+}
