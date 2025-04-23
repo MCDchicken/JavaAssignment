@@ -5,13 +5,20 @@ public class Customer {
     private String fullname;
     private String password;
     private String phoneNo;
+    private String email;
 
     //constructor for customer details
-    public Customer(String username, String fullname, String password, String phoneNo){
-        this.username = username;
-        this.fullname = fullname;
-        this.password = password;
-        this.phoneNo = phoneNo;
+    public Customer(String line) {
+        String[] parts = line.split(",");
+        if (parts.length == 5) { // Ensure the line has exactly 5 parts
+            this.username = parts[0];
+            this.fullname = parts[1];
+            this.password = parts[2];
+            this.phoneNo = parts[3];
+            this.email = parts[4];
+        } else {
+            throw new IllegalArgumentException("Invalid customer data format");
+        }
     }
 
     public String getUsername(){
@@ -46,6 +53,14 @@ public class Customer {
         this.phoneNo = phoneNo;
     }
 
+    public String getEmail(){
+        return email;
+    }
+
+    public void setEmail(String email){
+        this.email = email;
+    }
+
     //display customer details
     @Override
     public String toString() {
@@ -54,6 +69,7 @@ public class Customer {
                 + ", fullname='" + fullname + '\''
                 + ", password='" + password + '\''
                 + ", phoneNo='" + phoneNo + '\''
+                + ", email= '" + email + '\''
                 + '}';
     }
 
