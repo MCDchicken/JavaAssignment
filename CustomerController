@@ -1,0 +1,610 @@
+package CustomerManagement;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
+public class CustomerController {
+
+    private Scanner scanner;
+
+    //later on need to pass by other classes
+    // Room availability
+    private static int standardRoomAvailability = 20;
+    private static int deluxeRoomAvailability = 32;
+    private static int familyRoomAvailability = 5;
+    private static int suiteAvailability = 15;
+    private static int executiveRoomAvailability = 18;
+
+    // Room price
+    //change to array
+    private static int standardRoomPrice = 150;
+    private static int deluxeRoomPrice = 250;
+    private static int familyRoomPrice = 350;
+    private static int suitePrice = 600;
+    private static int executiveRoomPrice = 150;
+
+    //File
+    private static final String CUSTOMER_FILE = "customer.txt";
+    private static final String BOOKINGS_FILE = "bookings.txt";
+
+    private static Customer loggedInCustomer = null;
+
+    public CustomerController(){
+        scanner = new Scanner(System.in);
+    }
+
+    public void custRegister() {
+        System.out.println("===============================================");
+        System.out.println("||             Customer Register             ||");
+        System.out.println("===============================================");
+
+        String username;
+        do{
+            System.out.print("Enter username: ");
+            username = scanner.nextLine().trim(); // Trim spaces
+
+            if(username.contains(",")){
+                System.out.println("\n[Username cannot contain ','. Please try another.]");
+                return;
+            }
+            if (searchCustomer(username) != null) {
+                System.out.println("\n[Username already taken. Try another one.]\n");
+                return;
+            }
+        }while(username.contains(",") || searchCustomer(username) != null);
+        
+    
+        System.out.print("Enter fullname: ");
+        String fullname = scanner.nextLine().trim(); // Trim spaces
+    
+        String password;
+        while (true) {
+            System.out.print("Enter password (must be more than 6 characters and contain at least one uppercase letter): ");
+            password = scanner.nextLine().trim(); // Trim spaces
+    
+            if (password.length() > 6 && password.matches(".*[A-Z].*")) {
+                break; // Exit the loop if the password is valid
+            } else {
+                System.out.println("\n[Invalid password. Please ensure it is more than 6 characters and contains at least one uppercase letter]\n");
+            }
+        }
+    
+        String phoneNo;
+        while (true) {
+            System.out.print("Enter phone number (e.g. 0121234567): ");
+            phoneNo = scanner.nextLine().trim(); // Trim spaces
+    
+            if (phoneNo.length() == 10 && phoneNo.matches("\\d+")) {
+                break; // Exit the loop if the phone number is valid
+            } else {
+                System.out.println("\n[Invalid phone number format. Please enter in exactly 10 digits]\n");
+            }
+        }
+    
+        String email;
+        while (true) {
+            System.out.print("Enter email: ");
+            email = scanner.nextLine().trim(); // Trim spaces
+    
+            if (email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) { // Updated regex
+                break; // Exit the loop if the email is valid
+            } else {
+                System.out.println("\n[Invalid email format. Please enter again]");
+                System.out.println("[e.g. user@example.com]\n");
+            }
+        }
+    
+        //save customer to file
+        String customerData = username + "," + fullname + "," + password + "," + phoneNo + "," + email;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(CUSTOMER_FILE, true))) {
+            bw.write(customerData);
+            bw.newLine();
+            System.out.println("\n[Registered successfully! Please login!]\n");
+        } catch (IOException e) {
+            System.out.println("\n[Error saving customer data: " + e.getMessage() + "]\n");
+            return;
+        }
+        custLogin();
+    }
+
+    public void custLogin(){
+        System.out.println("===============================================");
+        System.out.println("||               Customer Login              ||");
+        System.out.println("===============================================");
+        
+        while(true){
+            System.out.print("Enter username (or enter 'back' to return to Customer Menu): ");
+            String username = scanner.nextLine();
+
+            //check is the user want to go back to customer menu
+            if(username.equalsIgnoreCase("BACK")){  //back can be uppercase or lowercase
+                System.out.println("\n[Returning to Customer Menu...]\n");
+                displayLoginRegisterMenu();
+                return;
+            }
+            
+            System.out.print("Enter password: ");
+            String password = scanner.nextLine();
+
+            //check is the username registered
+            try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    int firstComma = line.indexOf(",");
+                    int secondComma = line.indexOf(",", firstComma + 1);
+                    if (firstComma != -1 && secondComma != -1) {
+                        String lineUsername = line.substring(0, firstComma);
+                        String linePassword = line.substring(firstComma + 1, secondComma);
+                        if (lineUsername.equals(username) && linePassword.equals(password)) {
+                            loggedInCustomer = new Customer(line);
+                            System.out.println("\n[Login successful! Welcome, '" + loggedInCustomer.getFullName() + "']\n");
+                            runCustMainMenu();
+                            return;
+                        }
+                    }
+                }
+                System.out.println("\n[Invalid username or password. Please try again]\n");
+            } catch (IOException e) {
+                System.out.println("\n[Error reading customer file: " + e.getMessage() + "]\n");
+            }
+            System.out.println("\n[Invalid username or password. Please try again]\n");
+        }
+    }
+
+    public void runCustMenu(){
+        displayLoginRegisterMenu();
+        int choice;
+        do{
+            while (true) {
+                System.out.print("Please choose an option: ");
+                if (scanner.hasNextInt()) { // Check if the input is an integer
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    break; // Exit the loop if input is valid
+                } else {
+                    System.out.println("[Invalid option. Please enter a valid number within 0-2!]");
+                    scanner.nextLine(); // Clear the invalid input
+                    choice = -1;
+                    continue;
+                }
+            }
+
+            switch (choice) {
+                case 1:
+                    System.out.println("\n[Customer Register selected]\n");
+                    custRegister();
+                    break;
+                case 2:
+                    System.out.println("\n[Customer Login selected]\n");
+                    custLogin();
+                    break;
+                case 55:
+                    displayLoginRegisterMenu();
+                    break;
+                case 0:
+                    System.out.println("Goodbye! Thanks for using our system!");
+                    System.exit(0); // Exit the program
+                    break;
+                default:
+                    System.out.println("\nInvalid choice. Please enter your option again. \n[Note: Enter '55' for display menu again.]\n");
+                    break;
+            }
+        }while (choice != 0);
+    }
+
+    //run customer main menu
+    public void runCustMainMenu(){
+        displayCustMainMenu();
+        int choice;
+        do{
+            while (true) {
+                System.out.print("Please choose an option: ");
+                if (scanner.hasNextInt()) { // Check if the input is an integer
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    break; // Exit the loop if input is valid
+                } else {
+                    System.out.println("Invalid input. Please enter a valid number.");
+                    scanner.nextLine(); // Clear the invalid input
+                    choice = -1;
+                    continue;
+                }
+            }
+
+            switch (choice) {
+                case 1:
+                    System.out.println("\n[View Profile selected]\n");
+                    viewCustProfile();
+                    break;
+                case 2:
+                    System.out.println("\n[View Room Type selected]\n");
+                    viewRoomType();
+                    break;
+                case 3:
+                    System.out.println("\n[View Room Availability selected]\n");
+                    viewRoomAvailable();
+                    break;
+                case 4:
+                    System.out.println("\n[Book A Room selected]\n");
+                    custBookRoom();
+                    break;
+                case 5:
+                    System.out.println("\n[View My Booking selected]\n");
+                    viewBooking();
+                    break;
+                case 6:
+                    System.out.println("\n[Check-in selected]\n");
+                    custCheckIn();
+                    break;
+                case 7:
+                    System.out.println("\n[Check-out selected]\n");
+                    custCheckOut();
+                    break;
+                case 55:  //replay customer main menu
+                    displayCustMainMenu();
+                    break;
+                case 0:
+                    System.out.println("Goodbye! Thanks for using our system!");
+                    System.exit(0); // Exit the program
+                    break;
+                default:
+                    System.out.println("\nInvalid choice. Please enter your option again. \n[Note: Enter '55' for display menu again.]\n");
+                    break;
+            }
+        }while (choice != 0);
+    }
+
+    //view customer profile
+    public void viewCustProfile(){
+        System.out.println("View Customer Profile");
+    }
+
+    //view room type
+    public void viewRoomType(){
+        int choice;
+        displayRoomType();
+
+        System.out.println("\n[1] Book a room");
+        System.out.println("[2] View Room Availability");     
+        System.out.println("[3] Return to Customer Main Menu");
+        System.out.println("[0] Exit");
+
+        do{
+            while (true) {
+                System.out.print("Please choose an option: ");
+                if (scanner.hasNextInt()) { // Check if the input is an integer
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    break; // Exit the loop if input is valid
+                } else {
+                    System.out.println("Invalid input. Please enter a valid number.");
+                    scanner.nextLine(); // Clear the invalid input
+                    choice = -1;
+                    continue;
+                }
+            }
+
+            switch (choice) {
+                case 1:
+                    System.out.println("\n[Book A Room selected]\n");
+                    custBookRoom();
+                    break;
+                case 2:
+                    System.out.println("\n[View Room Availability selected]\n");
+                    viewRoomAvailable();
+                    break;
+                case 3:
+                    System.out.println("\n[Returning to Customer Main Menu...]\n");
+                    runCustMainMenu();
+                    break;
+                case 0:
+                    System.out.println("Goodbye! Thanks for using our system!");
+                    System.exit(0);
+                case 55:
+                    displayRoomType();
+                    break;
+                default:
+                    System.out.println("\nInvalid choice. Please enter your option again. \n[Note: Enter '55' for display menu again.]\n");
+                    break;
+            }
+        }while (choice != 0);
+
+    }
+    //view room availability
+    public void viewRoomAvailable(){
+        int choice;
+        displayRoomAvailable();
+
+        System.out.println("\n[1] Book a room");
+        System.out.println("[2] View Room Type");     
+        System.out.println("[3] Return to Customer Main Menu");
+        System.out.println("[0] Exit");
+
+        do{
+            while (true) {
+                System.out.print("Please choose an option: ");
+                if (scanner.hasNextInt()) { // Check if the input is an integer
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                    break; // Exit the loop if input is valid
+                } else {
+                    System.out.println("Invalid input. Please enter a valid number.");
+                    scanner.nextLine(); // Clear the invalid input
+                    choice = -1;
+                    continue;
+                }
+            }
+    
+            switch (choice) {
+                case 1:
+                    System.out.println("\n[Book A Room selected]\n");
+                    custBookRoom();
+                    break;
+                case 2:
+                    System.out.println("\n[View Room Type selected]\n");
+                    viewRoomType();
+                    break;
+                case 3:
+                    System.out.println("\n[Returning to Customer Main Menu...]\n");
+                    runCustMainMenu();
+                    break;
+                case 0:
+                    System.out.println("Goodbye! Thanks for using our system!");
+                    System.exit(0);
+                case 55:
+                    displayRoomType();
+                    break;
+                default:
+                    System.out.println("\nInvalid choice. Please enter your option again. \n[Note: Enter '55' for display menu again.]\n");
+                    break;
+            }
+        }while(choice!=0);
+        
+    }
+
+    //book a room
+    public void custBookRoom(){
+        int roomChoice;
+
+        System.out.println("\nAvailable Room Types:");
+        System.out.println("[1] Standard Room: RM " + standardRoomPrice + ")");
+        System.out.println("[2] Deluxe Room: RM " + deluxeRoomPrice + ")");
+        System.out.println("[3] Family Room: RM " + familyRoomPrice + ")");
+        System.out.println("[4] Suite: RM " + suitePrice + ")");
+        System.out.println("[5] Executive Room: RM " + executiveRoomPrice + ")");
+        System.out.println("[6] Return to Customer Main Menu");
+        System.out.println("[0] Exit");
+        System.out.print("Please choose a room type: ");
+        roomChoice = scanner.nextInt();
+
+        String roomType = "";
+        int price = 0;
+        int availability = 0;
+
+        do{
+            switch (roomChoice) {
+                case 1:
+                    roomType = "Standard Room";
+                    price = standardRoomPrice;
+                    availability = standardRoomAvailability;
+                    break;
+                case 2:
+                    roomType = "Deluxe Room";
+                    price = deluxeRoomPrice;
+                    availability = deluxeRoomAvailability;
+                    break;
+                case 3:
+                    roomType = "Family Room";
+                    price = familyRoomPrice;
+                    availability = familyRoomAvailability;
+                    break;
+                case 4:
+                    roomType = "Suite";
+                    price = suitePrice;
+                    availability = suiteAvailability;
+                    break;
+                case 5:
+                    roomType = "Executive Room";
+                    price = executiveRoomPrice;
+                    availability = executiveRoomAvailability;
+                    break;
+                case 6:
+                    runCustMainMenu();
+                    break;
+                case 0:
+                    System.out.println("Goodbye! Thanks for using our system!");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid room type. Please select again.");
+                    return;
+            }
+        }while(roomChoice != 0);
+
+        if (availability <= 0) {
+            System.out.println(roomType + " is not available.");
+            return;
+        }
+
+        int nights;
+
+        do{
+            System.out.print("Enter number of nights: ");
+            nights = scanner.nextInt();
+            scanner.nextLine();
+            if (nights <= 0) {
+                System.out.println("Number of nights must be positive.");
+                return;
+            }
+        }while(nights <= 0);
+        
+
+        int totalPrice = price * nights;
+        String confirm;
+
+        
+        System.out.println("Booking: " + roomType + " for " + nights + " night(s)");
+        System.out.println("Total Price: RM " + totalPrice);
+        System.out.print("Confirm booking? (y/n): ");
+        confirm = scanner.nextLine();
+        if (!confirm.equalsIgnoreCase("y")) {
+                System.out.println("Booking cancelled. Returning to Customer Main Menu");
+                return;
+        }
+        
+        String bookingData = loggedInCustomer.getUsername() + "," + roomType + "," + nights + "," + totalPrice;
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(BOOKINGS_FILE, true))) {
+            bw.write(bookingData);
+            bw.newLine();
+            System.out.println("Booking successful!");
+        } catch (IOException e) {
+            System.out.println("Error saving booking: " + e.getMessage());
+            return;
+        }
+
+        switch (roomChoice) {
+            case 1: standardRoomAvailability--; break;
+            case 2: deluxeRoomAvailability--; break;
+            case 3: familyRoomAvailability--; break;
+            case 4: suiteAvailability--; break;
+            case 5: executiveRoomAvailability--; break;
+        }
+    }
+    //view my booking
+    public static void viewBooking(){
+        System.out.println("\nBookings for " + loggedInCustomer.getUsername() + " (" + loggedInCustomer.getFullName() + "):");
+        boolean hasBookings = false;
+
+        File file = new File(BOOKINGS_FILE);
+        if (!file.exists()) {
+            System.out.println("\n[No bookings exist yet.]\n");
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                int firstComma = line.indexOf(",");
+                if (firstComma != -1) {
+                    String bookingUsername = line.substring(0, firstComma);
+                    if (bookingUsername.equals(loggedInCustomer.getUsername())) {
+                        hasBookings = true;
+                        int secondComma = line.indexOf(",", firstComma + 1);
+                        int thirdComma = line.indexOf(",", secondComma + 1);
+                        String roomType = line.substring(firstComma + 1, secondComma);
+                        String nights = line.substring(secondComma + 1, thirdComma);
+                        String totalPrice = line.substring(thirdComma + 1);
+                        System.out.println("Booking: Room: " + roomType + ", Nights: " + nights + ", Total Price: RM " + totalPrice);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("\n[Error reading bookings: " + e.getMessage() + "]\n");
+            return;
+        }
+
+        if (!hasBookings) {
+            System.out.println("\n[No bookings found.]\n");
+        }
+
+    }
+
+    //search customer is them in the customer file
+    private Customer searchCustomer(String username) {
+    File file = new File(CUSTOMER_FILE);
+    if (!file.exists()) {
+        return null; // File does not exist
+    }
+
+    try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            int firstComma = line.indexOf(",");
+            if (firstComma != -1) {
+                String lineUsername = line.substring(0, firstComma);
+                if (lineUsername.equals(username)) {
+                    return new Customer(line); // Create a Customer object from the line
+                }
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("\n[Error searching customer: " + e.getMessage() + "]\n");
+    }
+    return null; // Customer not found
+}
+
+    //check-in
+    public void custCheckIn(){
+        System.out.println("check in");
+    }
+    //check-out
+    public void custCheckOut(){
+        System.out.println("check out");
+    }
+
+
+    public static void displayLoginRegisterMenu(){
+        //System.out.println("===============================================");
+        //System.out.println("||     WELCOME TO HOTEL MANAGEMENT SYSTEM     ||");
+        System.out.println("===============================================");
+        System.out.println("||               Customer Menu                ||");
+        System.out.println("===============================================");
+        System.out.println("|| [1] Register                               ||");
+        System.out.println("|| [2] Login                                  ||");
+        System.out.println("|| [0] Exit                                   ||");
+        System.out.println("===============================================");
+
+    }
+
+    //customer main menu
+    public static void displayCustMainMenu(){
+        System.out.println("===============================================");
+        System.out.println("||             Customer Main Menu             ||");
+        System.out.println("===============================================");
+        System.out.println("|| [1] View Profile                           || ");
+        System.out.println("|| [2] View Room Type                         || ");
+        System.out.println("|| [3] View Room Availability                 || ");
+        System.out.println("|| [4] Book a room                            || ");
+        System.out.println("|| [5] View my booking                        || ");
+        System.out.println("|| [6] Check-in                               || ");
+        System.out.println("|| [7] Check-out                              || ");
+        System.out.println("|| [0] Exit                                   || ");
+        System.out.println("===============================================");
+    }
+
+    public static void displayRoomType(){
+        System.out.println("┌──────────────────────┬────────────┬────────────────────────────────────────────────────────────────────────────────────┬─────────────────┐");
+        System.out.printf("| %-20s | %-10s | %-82s | %-15s |\n", "Room Type", "Price", "Description", "Capacity");
+        System.out.println("├──────────────────────┼────────────┼────────────────────────────────────────────────────────────────────────────────────┼─────────────────┤");
+        System.out.printf("| %-20s | RM %-7d | %-82s | %-15s |\n", "Standard Room", standardRoomPrice, "A simple room with essential amenities for solo travelers or couples.", "1-2 pax");
+        System.out.println("├──────────────────────┼────────────┼────────────────────────────────────────────────────────────────────────────────────┼─────────────────┤");
+        System.out.printf("| %-20s | RM %-7d | %-82s | %-15s |\n", "Deluxe Room", deluxeRoomPrice, "A more spacious and upgraded room with additional amenities.", "2-3 pax");
+        System.out.println("├──────────────────────┼────────────┼────────────────────────────────────────────────────────────────────────────────────┼─────────────────┤");
+        System.out.printf("| %-20s | RM %-7d | %-82s | %-15s |\n", "Family Room", familyRoomPrice, "A larger room with multiple beds, ideal for families or small groups.", "3-5 pax");
+        System.out.println("├──────────────────────┼────────────┼────────────────────────────────────────────────────────────────────────────────────┼─────────────────┤");
+        System.out.printf("| %-20s | RM %-7d | %-82s | %-15s |\n", "Suite", suitePrice, "A luxurious room with separate living and sleeping areas.", "2-4 pax");
+        System.out.println("├──────────────────────┼────────────┼────────────────────────────────────────────────────────────────────────────────────┼─────────────────┤");
+        System.out.printf("| %-20s | RM %-7d | %-82s | %-15s |\n", "Executive Room", executiveRoomPrice, "Designed for business travelers, featuring a workspace and premium amenities.", "1-2 pax");
+        System.out.println("└──────────────────────┴────────────┴────────────────────────────────────────────────────────────────────────────────────┴─────────────────┘");
+    }
+
+    public static void displayRoomAvailable(){
+        System.out.println("\n=========== Room Availability ===========");
+        System.out.printf("| %-20s | %-18s |\n", "Room Type", "Available Rooms");
+        System.out.println("┌──────────────────────┼─────────────────────┐");
+        System.out.printf("| %-20s | %-18d |\n", "Standard Room", standardRoomAvailability);
+        System.out.println("├──────────────────────┼─────────────────────┤");
+        System.out.printf("| %-20s | %-18d |\n", "Deluxe Room", deluxeRoomAvailability);
+        System.out.println("├──────────────────────┼─────────────────────┤");
+        System.out.printf("| %-20s | %-18d |\n", "Family Room", familyRoomAvailability);
+        System.out.println("├──────────────────────┼─────────────────────┤");
+        System.out.printf("| %-20s | %-18d |\n", "Suite", suiteAvailability);
+        System.out.println("├──────────────────────┼─────────────────────┤");
+        System.out.printf("| %-20s | %-18d |\n", "Executive Room", executiveRoomAvailability);
+        System.out.println("└──────────────────────┴─────────────────────┘");
+    }
+}
