@@ -7,6 +7,7 @@ public class HotelMainMenu {
         Scanner sc = new Scanner(System.in);
         int choice;
         displayHotelMenu(); // Display the menu
+        CustomerController customerController = new CustomerController();
 
         do {
             System.out.print("Please choose an option: ");
@@ -14,11 +15,11 @@ public class HotelMainMenu {
 
             switch (choice) {
                 case 1:
-                    System.out.println("Redirecting to Customer Login/Register page...");
-                    // Call the customer login/register method here
+                    System.out.println("\n[Customer Login selected]\n");
+                    customerController.runCustMenu();
                     break;
                 case 2:
-                    System.out.println("Redirecting to Staff Login page...");
+                    System.out.println("\n[Staff Login selected]\n");
                     // Call the staff login method here
                     break;
                 case 55:
