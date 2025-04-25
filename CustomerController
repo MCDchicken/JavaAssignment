@@ -628,7 +628,7 @@ public class CustomerController {
         }
     }
     //view my booking
-    public static void viewBooking(){
+    public void viewBooking(){
         System.out.println("\nBookings for " + loggedInCustomer.getUsername() + " (" + loggedInCustomer.getFullName() + "):");
         boolean hasBookings = false;
 
