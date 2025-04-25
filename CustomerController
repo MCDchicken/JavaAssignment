@@ -100,7 +100,7 @@ public class CustomerController {
         }
     
         //save customer to file
-        String customerData = username + "," + fullname + "," + password + "," + phoneNo + "," + email;
+        String customerData = username + "|" + fullname + "|" + password + "|" + phoneNo + "|" + email;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(CUSTOMER_FILE, true))) {
             bw.write(customerData);
             bw.newLine();
@@ -109,9 +109,9 @@ public class CustomerController {
             System.out.println("\n[Error saving customer data: " + e.getMessage() + "]\n");
             return;
         }
-        custLogin();
-    }
-
+            custLogin();
+            }
+ 
     public void custLogin(){
         System.out.println("===============================================");
         System.out.println("||               Customer Login              ||");
@@ -135,11 +135,10 @@ public class CustomerController {
             try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    int firstComma = line.indexOf(",");
-                    int secondComma = line.indexOf(",", firstComma + 1);
-                    if (firstComma != -1 && secondComma != -1) {
-                        String lineUsername = line.substring(0, firstComma);
-                        String linePassword = line.substring(firstComma + 1, secondComma);
+                    String[] parts = line.split("\\|"); // Split using "|"
+                    if (parts.length >= 2) {
+                        String lineUsername = parts[0];
+                        String linePassword = parts[2];
                         if (lineUsername.equals(username) && linePassword.equals(password)) {
                             loggedInCustomer = new Customer(line);
                             System.out.println("\n[Login successful! Welcome, '" + loggedInCustomer.getFullName() + "']\n");
@@ -153,9 +152,9 @@ public class CustomerController {
                 System.out.println("\n[Error reading customer file: " + e.getMessage() + "]\n");
             }
             System.out.println("\n[Invalid username or password. Please try again]\n");
+            }
         }
-    }
-
+    
     public void runCustMenu(){
         displayLoginRegisterMenu();
         int choice;
@@ -218,7 +217,7 @@ public class CustomerController {
 
             switch (choice) {
                 case 1:
-                    System.out.println("\n[View Profile selected]\n");
+                    System.out.println("\n[View Profile selected]\n");    ///////////////not done yet////////////////
                     viewCustProfile();
                     break;
                 case 2:
@@ -238,11 +237,11 @@ public class CustomerController {
                     viewBooking();
                     break;
                 case 6:
-                    System.out.println("\n[Check-in selected]\n");
+                    System.out.println("\n[Check-in selected]\n");   ///////////////not done yet////////////////
                     custCheckIn();
                     break;
                 case 7:
-                    System.out.println("\n[Check-out selected]\n");
+                    System.out.println("\n[Check-out selected]\n");   ///////////////not done yet////////////////
                     custCheckOut();
                     break;
                 case 55:  //replay customer main menu
@@ -260,8 +259,162 @@ public class CustomerController {
     }
 
     //view customer profile
-    public void viewCustProfile(){
-        System.out.println("View Customer Profile");
+    public void viewCustProfile() {
+        // Display the customer's profile
+        System.out.println("================================================");
+        System.out.println("||             Customer Profile               ||");
+        System.out.println("================================================");
+        System.out.printf("|| %-20s: %-20s ||\n", "Username", loggedInCustomer.getUsername());
+        System.out.printf("|| %-20s: %-20s ||\n", "Full Name", loggedInCustomer.getFullName());
+        System.out.printf("|| %-20s: %-20s ||\n", "Phone Number", loggedInCustomer.getPhoneNo());
+        System.out.printf("|| %-20s: %-20s ||\n", "Email", loggedInCustomer.getEmail());
+        System.out.println("================================================");
+    
+        // Prompt the user for an action
+        int choice;
+        while (true) {
+            System.out.println("\nSelect an option:");
+            System.out.println("[1] Modify Profile");
+            System.out.println("[0] Return to Customer Main Menu");
+            System.out.print("Please choose an option: ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Clear the buffer
+                if (choice == 0 || choice == 1) {
+                    break;
+                } else {
+                    System.out.println("[Invalid option. Please enter 0 or 1]\n");
+                }
+            } else {
+                System.out.println("[Invalid input. Please enter a number]\n");
+                scanner.nextLine(); // Clear the invalid input
+            }
+        }
+    
+        if (choice == 0) {
+            System.out.println("\n[Returning to Customer Main Menu...]\n");
+            runCustMainMenu();
+            return;
+        }
+    
+        // Modify Profile
+        while (true) {
+            displayModifyProfileMenu();
+            System.out.print("Select an option: ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Clear the buffer
+                if (choice >= 0 && choice <= 4) {
+                    break;
+                } else {
+                    System.out.println("\n[Invalid option. Please enter 0-4.]\n");
+                }
+            } else {
+                System.out.println("\n[Invalid input. Please enter a number.]\n");
+                scanner.nextLine(); // Clear the invalid input
+            }
+        }
+    
+        if (choice == 0) {
+            System.out.println("\n[Modification cancelled. Returning to Customer Main Menu...]\n");
+            runCustMainMenu();
+            return;
+        }
+    
+        switch (choice) {
+            case 1: // Modify Full Name
+                System.out.print("Enter new full name: ");
+                String newFullName = scanner.nextLine().trim();
+                if (newFullName.isEmpty()) {
+                    System.out.println("\n[Full name cannot be empty.]\n");
+                    return;
+                }
+                loggedInCustomer.setFullName(newFullName);
+                break;
+    
+            case 2: // Modify Password
+                String newPassword;
+                while (true) {
+                    System.out.print("Enter new password (must be more than 6 characters and contain at least one uppercase letter): ");
+                    newPassword = scanner.nextLine().trim();
+                    if (newPassword.length() > 6 && newPassword.matches(".*[A-Z].*")) {
+                        break;
+                    } else {
+                        System.out.println("\n[Invalid password. Please ensure it is more than 6 characters and contains at least one uppercase letter]\n");
+                    }
+                }
+                loggedInCustomer.setPassword(newPassword);
+                break;
+    
+            case 3: // Modify Phone Number
+                String newPhoneNo;
+                while (true) {
+                    System.out.print("Enter new phone number (e.g. 0121234567): ");
+                    newPhoneNo = scanner.nextLine().trim();
+                    if (newPhoneNo.length() == 10 && newPhoneNo.matches("\\d+")) {
+                        break;
+                    } else {
+                        System.out.println("\n[Invalid phone number format. Please enter exactly 10 digits]\n");
+                    }
+                }
+                loggedInCustomer.setPhoneNo(newPhoneNo);
+                break;
+    
+            case 4: // Modify Email
+                String newEmail;
+                while (true) {
+                    System.out.print("Enter new email: ");
+                    newEmail = scanner.nextLine().trim();
+                    if (newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                        break;
+                    } else {
+                        System.out.println("\n[Invalid email format. Please enter again]\n[e.g. user@example.com]\n");
+                    }
+                }
+                loggedInCustomer.setEmail(newEmail);
+                break;
+        }
+    
+        // Update customer.txt
+        updateCustomerFile();
+        System.out.println("\n[Profile updated successfully!]\n");
+    
+        // Redisplay profile
+        viewCustProfile();
+    }
+
+    //after modify profile update to the newest version
+    private void updateCustomerFile() {
+        File file = new File(CUSTOMER_FILE);
+        if (!file.exists()) {
+            System.out.println("[Error: Customer file does not exist.]");
+            return;
+        }
+    
+        StringBuilder newFileContent = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                int firstComma = line.indexOf(",");
+                if (firstComma != -1) {
+                    String lineUsername = line.substring(0, firstComma);
+                    if (lineUsername.equals(loggedInCustomer.getUsername())) {
+                        line = loggedInCustomer.toString();
+                    }
+                }
+                newFileContent.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            System.out.println("[Error reading customer file: " + e.getMessage() + "]");
+            return;
+        }
+    
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(CUSTOMER_FILE))) {
+            bw.write(newFileContent.toString());
+            System.out.println("[Customer file updated successfully!]");
+        } catch (IOException e) {
+            System.out.println("[Error writing to customer file: " + e.getMessage() + "]");
+        }
     }
 
     //view room type
@@ -488,16 +641,14 @@ public class CustomerController {
         try (BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
-                int firstComma = line.indexOf(",");
-                if (firstComma != -1) {
-                    String bookingUsername = line.substring(0, firstComma);
+                String[] parts = line.split("\\|"); // Split using "|"
+                if (parts.length >= 4) {
+                    String bookingUsername = parts[0];
                     if (bookingUsername.equals(loggedInCustomer.getUsername())) {
                         hasBookings = true;
-                        int secondComma = line.indexOf(",", firstComma + 1);
-                        int thirdComma = line.indexOf(",", secondComma + 1);
-                        String roomType = line.substring(firstComma + 1, secondComma);
-                        String nights = line.substring(secondComma + 1, thirdComma);
-                        String totalPrice = line.substring(thirdComma + 1);
+                        String roomType = parts[1];
+                        String nights = parts[2];
+                        String totalPrice = parts[3];
                         System.out.println("Booking: Room: " + roomType + ", Nights: " + nights + ", Total Price: RM " + totalPrice);
                     }
                 }
@@ -513,39 +664,248 @@ public class CustomerController {
 
     }
 
-    //search customer is them in the customer file
-    private Customer searchCustomer(String username) {
-    File file = new File(CUSTOMER_FILE);
-    if (!file.exists()) {
-        return null; // File does not exist
-    }
-
-    try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            int firstComma = line.indexOf(",");
-            if (firstComma != -1) {
-                String lineUsername = line.substring(0, firstComma);
-                if (lineUsername.equals(username)) {
-                    return new Customer(line); // Create a Customer object from the line
-                }
-            }
-        }
-    } catch (IOException e) {
-        System.out.println("\n[Error searching customer: " + e.getMessage() + "]\n");
-    }
-    return null; // Customer not found
-}
-
     //check-in
     public void custCheckIn(){
-        System.out.println("check in");
+        if (loggedInCustomer == null) {
+            System.out.println("\n[Please log in to check in.]\n");
+            return;
+        }
+
+        System.out.println("\nYour Pending Bookings for Check-in:");
+        File file = new File(BOOKINGS_FILE);
+        if (!file.exists()) {
+            System.out.println("\n[No bookings exist yet.]\n");
+            return;
+        }
+
+        StringBuilder pendingBookings = new StringBuilder();
+        int bookingCount = 0;
+        //int selectedIndex = -1;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                int firstComma = line.indexOf(",");
+                if (firstComma != -1) {
+                    String bookingUsername = line.substring(0, firstComma);
+                    if (bookingUsername.equals(loggedInCustomer.getUsername())) {
+                        int secondComma = line.indexOf(",", firstComma + 1);
+                        int thirdComma = line.indexOf(",", secondComma + 1);
+                        int fourthComma = line.indexOf(",", thirdComma + 1);
+                        String roomType = line.substring(firstComma + 1, secondComma);
+                        String nights = line.substring(secondComma + 1, thirdComma);
+                        String totalPrice = line.substring(thirdComma + 1, fourthComma);
+                        String status = line.substring(fourthComma + 1);
+                        if (status.equals("PENDING")) {
+                            bookingCount++;
+                            pendingBookings.append("[" + bookingCount + "] Room: " + roomType + ", Nights: " + nights + ", Total Price: RM " + totalPrice + "\n");
+                            //if (bookingCount == 1) {
+                            //    selectedIndex = 0; // Default to first booking
+                            //}
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("\n[Error reading bookings: " + e.getMessage() + "]\n");
+            return;
+        }
+
+        if (bookingCount == 0) {
+            System.out.println("\n[No pending bookings available for check-in.]\n");
+            return;
+        }
+
+        System.out.println(pendingBookings.toString());
+        int choice;
+        while (true) {
+            System.out.print("Select a booking to check in (1-" + bookingCount + ", or 0 to cancel): ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                if (choice >= 0 && choice <= bookingCount) {
+                    break;
+                } else {
+                    System.out.println("\n[Invalid selection. Please choose a number between 1 and " + bookingCount + ", or 0 to cancel.]\n");
+                }
+            } else {
+                System.out.println("\n[Invalid input. Please enter a number.]\n");
+                scanner.nextLine();
+            }
+        }
+
+        if (choice == 0) {
+            System.out.println("\n[Check-in cancelled. Returning to Customer Main Menu.]\n");
+            runCustMainMenu();
+            return;
+        }
+
+        // Update the selected booking to CHECKED_IN
+        try {
+            StringBuilder newFileContent = new StringBuilder();
+            BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE));
+            String line;
+            int currentIndex = 0;
+            int targetIndex = choice - 1;
+            while ((line = br.readLine()) != null) {
+                int firstComma = line.indexOf(",");
+                String bookingUsername = line.substring(0, firstComma);
+                if (bookingUsername.equals(loggedInCustomer.getUsername())) {
+                    int fourthComma = line.lastIndexOf(",");
+                    String status = line.substring(fourthComma + 1);
+                    if (status.equals("PENDING")) {
+                        if (currentIndex == targetIndex) {
+                            line = line.substring(0, fourthComma + 1) + "CHECKED_IN";
+                        }
+                        currentIndex++;
+                    }
+                }
+                newFileContent.append(line).append("\n");
+            }
+            br.close();
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(BOOKINGS_FILE));
+            bw.write(newFileContent.toString());
+            bw.close();
+
+            System.out.println("\n[Check-in successful!]\n");
+        } catch (IOException e) {
+            System.out.println("\n[Error updating booking status: " + e.getMessage() + "]\n");
+        }
     }
     //check-out
     public void custCheckOut(){
-        System.out.println("check out");
+        if (loggedInCustomer == null) {
+            System.out.println("\n[Please log in to check out.]\n");
+            return;
+        }
+
+        System.out.println("\nYour Checked-in Bookings for Check-out:");
+        File file = new File(BOOKINGS_FILE);
+        if (!file.exists()) {
+            System.out.println("\n[No bookings exist yet.]\n");
+            return;
+        }
+
+        StringBuilder checkedInBookings = new StringBuilder();
+        int bookingCount = 0;
+        //int selectedIndex = -1;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                int firstComma = line.indexOf(",");
+                if (firstComma != -1) {
+                    String bookingUsername = line.substring(0, firstComma);
+                    if (bookingUsername.equals(loggedInCustomer.getUsername())) {
+                        int secondComma = line.indexOf(",", firstComma + 1);
+                        int thirdComma = line.indexOf(",", secondComma + 1);
+                        int fourthComma = line.indexOf(",", thirdComma + 1);
+                        String roomType = line.substring(firstComma + 1, secondComma);
+                        String nights = line.substring(secondComma + 1, thirdComma);
+                        String totalPrice = line.substring(thirdComma + 1, fourthComma);
+                        String status = line.substring(fourthComma + 1);
+                        if (status.equals("CHECKED_IN")) {
+                            bookingCount++;
+                            checkedInBookings.append("[" + bookingCount + "] Room: " + roomType + ", Nights: " + nights + ", Total Price: RM " + totalPrice + "\n");
+                            //if (bookingCount == 1) {
+                            //    selectedIndex = 0;
+                            //}
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("\n[Error reading bookings: " + e.getMessage() + "]\n");
+            return;
+        }
+
+        if (bookingCount == 0) {
+            System.out.println("\n[No checked-in bookings available for check-out.]\n");
+            return;
+        }
+
+        System.out.println(checkedInBookings.toString());
+        int choice;
+        while (true) {
+            System.out.print("Select a booking to check out (1-" + bookingCount + ", or 0 to cancel): ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                if (choice >= 0 && choice <= bookingCount) {
+                    break;
+                } else {
+                    System.out.println("\n[Invalid selection. Please choose a number between 1 and " + bookingCount + ", or 0 to cancel.]\n");
+                }
+            } else {
+                System.out.println("\n[Invalid input. Please enter a number.]\n");
+                scanner.nextLine();
+            }
+        }
+
+        if (choice == 0) {
+            System.out.println("\n[Check-out cancelled. Returning to Customer Main Menu.]\n");
+            runCustMainMenu();
+            return;
+        }
+
+        // Update the selected booking to CHECKED_OUT
+        try {
+            StringBuilder newFileContent = new StringBuilder();
+            BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE));
+            String line;
+            int currentIndex = 0;
+            int targetIndex = choice - 1;
+            while ((line = br.readLine()) != null) {
+                int firstComma = line.indexOf(",");
+                String bookingUsername = line.substring(0, firstComma);
+                if (bookingUsername.equals(loggedInCustomer.getUsername())) {
+                    int fourthComma = line.lastIndexOf(",");
+                    String status = line.substring(fourthComma + 1);
+                    if (status.equals("CHECKED_IN")) {
+                        if (currentIndex == targetIndex) {
+                            line = line.substring(0, fourthComma + 1) + "CHECKED_OUT";
+                        }
+                        currentIndex++;
+                    }
+                }
+                newFileContent.append(line).append("\n");
+            }
+            br.close();
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(BOOKINGS_FILE));
+            bw.write(newFileContent.toString());
+            bw.close();
+
+            System.out.println("\n[Check-out successful!]\n");
+        } catch (IOException e) {
+            System.out.println("\n[Error updating booking status: " + e.getMessage() + "]\n");
+        }
     }
 
+    //search customer is them in the customer file
+    private Customer searchCustomer(String username) {
+        File file = new File(CUSTOMER_FILE);
+        if (!file.exists()) {
+            return null; // File does not exist
+        }
+    
+        try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\\|"); // Split using "|"
+                if (parts.length >= 1) {
+                    String lineUsername = parts[0];
+                    if (lineUsername.equals(username)) {
+                        return new Customer(line); // Create a Customer object from the line
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("\n[Error searching customer: " + e.getMessage() + "]\n");
+        }
+        return null; // Customer not found
+    }
 
     public static void displayLoginRegisterMenu(){
         //System.out.println("===============================================");
@@ -607,4 +967,18 @@ public class CustomerController {
         System.out.printf("| %-20s | %-18d |\n", "Executive Room", executiveRoomAvailability);
         System.out.println("└──────────────────────┴─────────────────────┘");
     }
+
+    //modify profile
+    public void displayModifyProfileMenu(){
+        System.out.println("\n================================================");
+            System.out.println("||             Modify Profile                 ||");
+            System.out.println("================================================");
+            System.out.println("|| [1] Full Name                              ||");
+            System.out.println("|| [2] Password                               ||");
+            System.out.println("|| [3] Phone Number                           ||");
+            System.out.println("|| [4] Email                                  ||");
+            System.out.println("|| [0] Cancel                                 ||");
+            System.out.println("================================================");
+    }
+
 }
