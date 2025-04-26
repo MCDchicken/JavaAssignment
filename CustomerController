@@ -42,33 +42,33 @@ public class CustomerController {
         System.out.println("===============================================");
         System.out.println("||             Customer Register             ||");
         System.out.println("===============================================");
-
+    
         String username;
-        do{
+        do {
             System.out.print("Enter username: ");
-            username = scanner.nextLine().trim(); // Trim spaces
-
-            if(username.contains(",")){
+            username = scanner.nextLine().trim();
+    
+            if (username.contains(",")) {
                 System.out.println("\n[Username cannot contain ','. Please try another.]");
-                return;
+                continue;
             }
             if (searchCustomer(username) != null) {
                 System.out.println("\n[Username already taken. Try another one.]\n");
-                return;
+                continue;
             }
-        }while(username.contains(",") || searchCustomer(username) != null);
-        
+            break;
+        } while (true);
     
         System.out.print("Enter fullname: ");
-        String fullname = scanner.nextLine().trim(); // Trim spaces
+        String fullname = scanner.nextLine().trim();
     
         String password;
         while (true) {
             System.out.print("Enter password (must be more than 6 characters and contain at least one uppercase letter): ");
-            password = scanner.nextLine().trim(); // Trim spaces
+            password = scanner.nextLine().trim();
     
             if (password.length() > 6 && password.matches(".*[A-Z].*")) {
-                break; // Exit the loop if the password is valid
+                break;
             } else {
                 System.out.println("\n[Invalid password. Please ensure it is more than 6 characters and contains at least one uppercase letter]\n");
             }
@@ -77,82 +77,119 @@ public class CustomerController {
         String phoneNo;
         while (true) {
             System.out.print("Enter phone number (e.g. 0121234567): ");
-            phoneNo = scanner.nextLine().trim(); // Trim spaces
+            phoneNo = scanner.nextLine().trim();
     
             if (phoneNo.length() == 10 && phoneNo.matches("\\d+")) {
-                break; // Exit the loop if the phone number is valid
+                break;
             } else {
-                System.out.println("\n[Invalid phone number format. Please enter in exactly 10 digits]\n");
+                System.out.println("\n[Invalid phone number format. Please enter exactly 10 digits]\n");
             }
         }
     
         String email;
         while (true) {
             System.out.print("Enter email: ");
-            email = scanner.nextLine().trim(); // Trim spaces
+            email = scanner.nextLine().trim();
     
-            if (email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) { // Updated regex
-                break; // Exit the loop if the email is valid
+            if (email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                break;
             } else {
                 System.out.println("\n[Invalid email format. Please enter again]");
                 System.out.println("[e.g. user@example.com]\n");
             }
         }
     
-        //save customer to file
-        String customerData = username + "|" + fullname + "|" + password + "|" + phoneNo + "|" + email;
+        // Generate Customer ID
+        String customerId = generateCustomerId();
+    
+        // Save customer to file
+        String customerData = customerId + "|" + username + "|" + fullname + "|" + password + "|" + phoneNo + "|" + email;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(CUSTOMER_FILE, true))) {
             bw.write(customerData);
             bw.newLine();
-            System.out.println("\n[Registered successfully! Please login!]\n");
+            System.out.println("\n[Registered successfully! Your Customer ID is: " + customerId + "]\n");
+            System.out.println("[Please login to continue.]\n");
         } catch (IOException e) {
             System.out.println("\n[Error saving customer data: " + e.getMessage() + "]\n");
             return;
         }
-            custLogin();
+        custLogin();
+    }
+
+    private String generateCustomerId(){
+        File file = new File(CUSTOMER_FILE);
+        int id = 1; // Start with ID 1 if the file is empty
+        if (file.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split("\\|");
+                    if (parts.length > 0 && parts[0].startsWith("CUST")) {
+                        try {
+                            int currentId = Integer.parseInt(parts[0].substring(4)); // Extract numeric part of ID
+                            if (currentId >= id) {
+                                id = currentId + 1; // Increment ID
+                            }
+                        } catch (NumberFormatException e) {
+                            // Ignore invalid IDs
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("[Error reading customer file: " + e.getMessage() + "]");
             }
+        }
+        return "CUST" + id; // Prefix the ID with "CUST"
+    }
  
     public void custLogin(){
         System.out.println("===============================================");
         System.out.println("||               Customer Login              ||");
         System.out.println("===============================================");
-        
-        while(true){
+    
+        while (true) {
             System.out.print("Enter username (or enter 'back' to return to Customer Menu): ");
             String username = scanner.nextLine();
-
-            //check is the user want to go back to customer menu
-            if(username.equalsIgnoreCase("BACK")){  //back can be uppercase or lowercase
+    
+            if (username.equalsIgnoreCase("BACK")) {
                 System.out.println("\n[Returning to Customer Menu...]\n");
                 displayLoginRegisterMenu();
                 return;
             }
-            
+    
             System.out.print("Enter password: ");
             String password = scanner.nextLine();
-
-            //check is the username registered
+    
             try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
                 String line;
+                boolean usernameFound = false;
                 while ((line = br.readLine()) != null) {
-                    String[] parts = line.split("\\|"); // Split using "|"
-                    if (parts.length >= 2) {
-                        String lineUsername = parts[0];
-                        String linePassword = parts[2];
-                        if (lineUsername.equals(username) && linePassword.equals(password)) {
-                            loggedInCustomer = new Customer(line);
-                            System.out.println("\n[Login successful! Welcome, '" + loggedInCustomer.getFullName() + "']\n");
-                            runCustMainMenu();
-                            return;
+                    String[] parts = line.split("\\|");
+                    if (parts.length >= 3) {
+                        String lineUsername = parts[1];
+                        String linePassword = parts[3];
+                        if (lineUsername.equals(username)) {
+                            usernameFound = true;
+                            if (linePassword.equals(password)) {
+                                loggedInCustomer = new Customer(line);
+                                System.out.println("\n[Login successful! Welcome, '" + loggedInCustomer.getFullName() + "']\n");
+                                runCustMainMenu();
+                                return;
+                            } else {
+                                System.out.println("\n[Invalid password. Please try again.]\n");
+                                break;
+                            }
                         }
                     }
+                }
+                if (!usernameFound) {
+                    System.out.println("\n[Invalid username. Please try again.]\n");
                 }
             } catch (IOException e) {
                 System.out.println("\n[Error reading customer file: " + e.getMessage() + "]\n");
             }
-            System.out.println("\n[Invalid username or password. Please try again]\n");
-            }
         }
+    }
     
     public void runCustMenu(){
         displayLoginRegisterMenu();
@@ -259,10 +296,12 @@ public class CustomerController {
 
     //view customer profile
     public void viewCustProfile() {
+
         // Display the customer's profile
         System.out.println("================================================");
         System.out.println("||                Your Profile                ||");
         System.out.println("================================================");
+        System.out.printf("|| %-20s: %-20s ||\n", "Customer id", loggedInCustomer.getCustomerId());
         System.out.printf("|| %-20s: %-20s ||\n", "Username", loggedInCustomer.getUsername());
         System.out.printf("|| %-20s: %-20s ||\n", "Full Name", loggedInCustomer.getFullName());
         System.out.printf("|| %-20s: %-20s ||\n", "Phone Number", loggedInCustomer.getPhoneNo());
@@ -842,10 +881,10 @@ public class CustomerController {
             return;
         }
 
-        System.out.println("\nYour Checked-in Bookings for Check-out:");
+        System.out.println("Your Checked-in Bookings for Check-out:");
         File file = new File(BOOKINGS_FILE);
         if (!file.exists()) {
-            System.out.println("\n[No bookings exist yet.]\n");
+            System.out.println("\n[No bookings found]\n");
             return;
         }
 
@@ -949,15 +988,21 @@ public class CustomerController {
     private Customer searchCustomer(String username) {
         File file = new File(CUSTOMER_FILE);
         if (!file.exists()) {
-            System.out.println("Error: Customer file does not exist.");
+            System.out.println("[Error: Customer file does not exist. Creating a new file...]");
+            try {
+                file.createNewFile(); // Create the file if it does not exist
+            } catch (IOException e) {
+                System.out.println("[Error creating customer file: " + e.getMessage() + "]");
+                return null;
+            }
         }
     
         try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split("\\|"); // Split using "|"
-                if (parts.length >= 1) {
-                    String lineUsername = parts[0];
+                if (parts.length >= 2) { // Ensure the array has at least 2 elements
+                    String lineUsername = parts[1]; // Username is the second field
                     if (lineUsername.equals(username)) {
                         return new Customer(line); // Create a Customer object from the line
                     }
@@ -1042,5 +1087,6 @@ public class CustomerController {
             System.out.println("|| [0] Cancel                                 ||");
             System.out.println("================================================");
     }
+
 
 }
