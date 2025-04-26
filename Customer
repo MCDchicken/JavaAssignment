@@ -6,16 +6,18 @@ public class Customer {
     private String password;
     private String phoneNo;
     private String email;
+    private String customerId;
 
     //constructor for customer details
     public Customer(String line) {
-        String[] parts = line.split(",");
-        if (parts.length == 5) { // Ensure the line has exactly 5 parts
-            this.username = parts[0];
-            this.fullname = parts[1];
-            this.password = parts[2];
-            this.phoneNo = parts[3];
-            this.email = parts[4];
+        String[] parts = line.split("\\|"); // Split using "|"
+        if (parts.length == 6) { // Ensure the line has exactly 5 parts
+            this.customerId = parts[0];
+            this.username = parts[1];
+            this.fullname = parts[2];
+            this.password = parts[3];
+            this.phoneNo = parts[4];
+            this.email = parts[5];
         } else {
             throw new IllegalArgumentException("Invalid customer data format");
         }
@@ -61,6 +63,14 @@ public class Customer {
         this.email = email;
     }
 
+    public String getCustomerId(){
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId){
+        this.customerId = customerId;
+    }
+
     //display customer details
     @Override
     public String toString() {
@@ -70,6 +80,8 @@ public class Customer {
                 + ", password='" + password + '\''
                 + ", phoneNo='" + phoneNo + '\''
                 + ", email= '" + email + '\''
+                + ", customer id= '" + customerId + '\''
                 + '}';
     }
+
 }
