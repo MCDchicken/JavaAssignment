@@ -147,7 +147,6 @@ public class CustomerController {
                         }
                     }
                 }
-                System.out.println("\n[Invalid username or password. Please try again]\n");
             } catch (IOException e) {
                 System.out.println("\n[Error reading customer file: " + e.getMessage() + "]\n");
             }
@@ -262,7 +261,7 @@ public class CustomerController {
     public void viewCustProfile() {
         // Display the customer's profile
         System.out.println("================================================");
-        System.out.println("||             Customer Profile               ||");
+        System.out.println("||                Your Profile                ||");
         System.out.println("================================================");
         System.out.printf("|| %-20s: %-20s ||\n", "Username", loggedInCustomer.getUsername());
         System.out.printf("|| %-20s: %-20s ||\n", "Full Name", loggedInCustomer.getFullName());
@@ -273,7 +272,7 @@ public class CustomerController {
         // Prompt the user for an action
         int choice;
         while (true) {
-            System.out.println("\nSelect an option:");
+            System.out.println("Select an option:");
             System.out.println("[1] Modify Profile");
             System.out.println("[0] Return to Customer Main Menu");
             System.out.print("Please choose an option: ");
@@ -283,7 +282,7 @@ public class CustomerController {
                 if (choice == 0 || choice == 1) {
                     break;
                 } else {
-                    System.out.println("[Invalid option. Please enter 0 or 1]\n");
+                    System.out.println("[Invalid option. Please enter 0 or 1]");
                 }
             } else {
                 System.out.println("[Invalid input. Please enter a number]\n");
@@ -395,12 +394,9 @@ public class CustomerController {
         try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
-                int firstComma = line.indexOf(",");
-                if (firstComma != -1) {
-                    String lineUsername = line.substring(0, firstComma);
-                    if (lineUsername.equals(loggedInCustomer.getUsername())) {
-                        line = loggedInCustomer.toString();
-                    }
+                String[] parts = line.split("\\|");
+                if (parts[0].equals(loggedInCustomer.getUsername())) {
+                    line = loggedInCustomer.toString();
                 }
                 newFileContent.append(line).append("\n");
             }
@@ -522,25 +518,39 @@ public class CustomerController {
 
     //book a room
     public void custBookRoom(){
-        int roomChoice;
+        int choice;
 
         System.out.println("\nAvailable Room Types:");
-        System.out.println("[1] Standard Room: RM " + standardRoomPrice + ")");
-        System.out.println("[2] Deluxe Room: RM " + deluxeRoomPrice + ")");
-        System.out.println("[3] Family Room: RM " + familyRoomPrice + ")");
-        System.out.println("[4] Suite: RM " + suitePrice + ")");
-        System.out.println("[5] Executive Room: RM " + executiveRoomPrice + ")");
+        System.out.println("[1] Standard Room: RM " + standardRoomPrice );
+        System.out.println("[2] Deluxe Room: RM " + deluxeRoomPrice );
+        System.out.println("[3] Family Room: RM " + familyRoomPrice );
+        System.out.println("[4] Suite: RM " + suitePrice );
+        System.out.println("[5] Executive Room: RM " + executiveRoomPrice );
         System.out.println("[6] Return to Customer Main Menu");
         System.out.println("[0] Exit");
-        System.out.print("Please choose a room type: ");
-        roomChoice = scanner.nextInt();
+
+        do {
+            System.out.print("Please choose an option: ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline
+                if (choice >= 0 && choice <= 6) { // Ensure valid range
+                    break;
+                } else {
+                    System.out.println("Invalid choice. Please enter a valid number.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.nextLine(); // Clear invalid input
+            }
+        } while (true);
 
         String roomType = "";
         int price = 0;
         int availability = 0;
 
         do{
-            switch (roomChoice) {
+            switch (choice) {
                 case 1:
                     roomType = "Standard Room";
                     price = standardRoomPrice;
@@ -576,30 +586,27 @@ public class CustomerController {
                     System.out.println("Invalid room type. Please select again.");
                     return;
             }
-        }while(roomChoice != 0);
-
-        if (availability <= 0) {
-            System.out.println(roomType + " is not available.");
-            return;
-        }
+        }while(choice != 0);
 
         int nights;
-
-        do{
+        while (true) {
             System.out.print("Enter number of nights: ");
-            nights = scanner.nextInt();
-            scanner.nextLine();
-            if (nights <= 0) {
-                System.out.println("Number of nights must be positive.");
-                return;
+            if (scanner.hasNextInt()) {
+                nights = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline
+                if (nights > 0) {
+                    break;
+                } else {
+                    System.out.println("Number of nights must be positive.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a valid number.");
+                scanner.nextLine(); // Clear invalid input
             }
-        }while(nights <= 0);
-        
+        }
 
         int totalPrice = price * nights;
         String confirm;
-
-        
         System.out.println("Booking: " + roomType + " for " + nights + " night(s)");
         System.out.println("Total Price: RM " + totalPrice);
         System.out.print("Confirm booking? (y/n): ");
@@ -619,23 +626,55 @@ public class CustomerController {
             return;
         }
 
-        switch (roomChoice) {
-            case 1: standardRoomAvailability--; break;
-            case 2: deluxeRoomAvailability--; break;
-            case 3: familyRoomAvailability--; break;
-            case 4: suiteAvailability--; break;
-            case 5: executiveRoomAvailability--; break;
+        if (availability > 0) {
+            switch (choice) {
+                case 1: standardRoomAvailability--; break; 
+                case 2: deluxeRoomAvailability--; break;
+                case 3: familyRoomAvailability--; break;
+                case 4: suiteAvailability--; break;
+                case 5: executiveRoomAvailability--; break;
+            }
+        } else { //if availability = 0
+            System.out.println(roomType + " is not available.");
+            return;
         }
     }
     //view my booking
     public void viewBooking(){
-        System.out.println("\nBookings for " + loggedInCustomer.getUsername() + " (" + loggedInCustomer.getFullName() + "):");
+        System.out.println("\nBookings for " + loggedInCustomer.getUsername() + " [" + loggedInCustomer.getFullName() + "]:");
         boolean hasBookings = false;
 
         File file = new File(BOOKINGS_FILE);
-        if (!file.exists()) {
-            System.out.println("\n[No bookings exist yet.]\n");
-            return;
+        if (!file.exists() || !hasBookings) {
+            System.out.println("\n[No bookings found]\n");
+            int choice;
+        while (true) {
+            System.out.println("\nSelect an option:");
+            System.out.println("[1] Return to Customer Main Menu");
+            System.out.println("[0] Exit");
+            System.out.print("Please choose an option: ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Clear the buffer
+                if (choice == 0 || choice == 1) {
+                    break;
+                } else {
+                    System.out.println("[Invalid option. Please enter 0 or 1]\n");
+                }
+            } else {
+                System.out.println("[Invalid input. Please enter a number]\n");
+                scanner.nextLine(); // Clear the invalid input
+            }
+        }
+
+        if (choice == 0) {
+            System.out.println("Goodbye! Thanks for using our system!");
+            System.exit(0); // Exit the program
+        } else if (choice == 1) {
+            System.out.println("\n[Returning to Customer Main Menu...]\n");
+            runCustMainMenu(); // Return to the customer main menu
+        }
+        return;
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
@@ -658,10 +697,6 @@ public class CustomerController {
             return;
         }
 
-        if (!hasBookings) {
-            System.out.println("\n[No bookings found.]\n");
-        }
-
     }
 
     //check-in
@@ -674,8 +709,35 @@ public class CustomerController {
         System.out.println("\nYour Pending Bookings for Check-in:");
         File file = new File(BOOKINGS_FILE);
         if (!file.exists()) {
-            System.out.println("\n[No bookings exist yet.]\n");
-            return;
+            System.out.println("\n[No bookings found]\n");
+            int choice;
+        while (true) {
+            System.out.println("\nSelect an option:");
+            System.out.println("[1] Return to Customer Main Menu");
+            System.out.println("[0] Exit");
+            System.out.print("Please choose an option: ");
+            if (scanner.hasNextInt()) {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // Clear the buffer
+                if (choice == 0 || choice == 1) {
+                    break;
+                } else {
+                    System.out.println("[Invalid option. Please enter 0 or 1]\n");
+                }
+            } else {
+                System.out.println("[Invalid input. Please enter a number]\n");
+                scanner.nextLine(); // Clear the invalid input
+            }
+        }
+
+        if (choice == 0) {
+            System.out.println("Goodbye! Thanks for using our system!");
+            System.exit(0); // Exit the program
+        } else if (choice == 1) {
+            System.out.println("\n[Returning to Customer Main Menu...]\n");
+            runCustMainMenu(); // Return to the customer main menu
+        }
+        return;
         }
 
         StringBuilder pendingBookings = new StringBuilder();
@@ -887,7 +949,7 @@ public class CustomerController {
     private Customer searchCustomer(String username) {
         File file = new File(CUSTOMER_FILE);
         if (!file.exists()) {
-            return null; // File does not exist
+            System.out.println("Error: Customer file does not exist.");
         }
     
         try (BufferedReader br = new BufferedReader(new FileReader(CUSTOMER_FILE))) {
