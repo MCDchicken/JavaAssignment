@@ -438,7 +438,8 @@ public class CustomerController {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split("\\|");
-                if (parts[0].equals(loggedInCustomer.getUsername())) {
+                if (parts.length > 1 && parts[0].equals(loggedInCustomer.getCustomerId())) {
+                    // Update the line with the latest loggedInCustomer data
                     line = loggedInCustomer.toString();
                 }
                 newFileContent.append(line).append("\n");
@@ -455,7 +456,7 @@ public class CustomerController {
             System.out.println("[Error writing to customer file: " + e.getMessage() + "]");
         }
     }
-
+    
     //view room type
     public void viewRoomType(){
         int choice;
@@ -655,9 +656,24 @@ public class CustomerController {
             System.out.println("Booking: " + roomType + " for " + nights + " night(s)");
             System.out.println("Total Price: RM " + totalPrice);
             System.out.print("Confirm booking? (y/n): ");
-            String confirm = scanner.nextLine();
-            if (!confirm.equalsIgnoreCase("y")) {
-                System.out.println("Booking cancelled. Returning to Customer Main Menu");
+            String confirm;
+            while(true){
+                try {
+                    confirm = scanner.nextLine().trim().toLowerCase(); // Convert input to lowercase for easier comparison
+                    if (confirm.length() == 1 && (confirm.equals("y") || confirm.equals("n"))) {
+                        break; // Exit the loop if the input is valid
+                    } else {
+                        throw new IllegalArgumentException("[Invalid input. Please enter 'y' for yes or 'n' for no.]");
+                    }
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                    System.out.print("Confirm booking? (y/n): ");
+                }
+            }
+
+            if (confirm.equals("n")) {
+                System.out.println("Booking cancelled. Returning to Customer Main Menu.");
+                runCustMainMenu();
                 return;
             }
         
@@ -1139,10 +1155,10 @@ public class CustomerController {
         } while (true);
     
         switch (choice) {
-            case 1: //tng
+            case 1: // TNG eWallet
                 payment = new TNGPayment(totalPrice);
                 break;
-            case 2: //credit card
+            case 2: // Credit Card
                 System.out.print("Enter Credit Card Number: ");
                 String creditCardNumber = scanner.nextLine();
                 while (!creditCardNumber.matches("\\d{16}")) { // Validate card number (16 digits)
@@ -1150,7 +1166,7 @@ public class CustomerController {
                     System.out.print("Enter Credit Card Number: ");
                     creditCardNumber = scanner.nextLine();
                 }
-
+    
                 System.out.print("Enter Card Expiry Date (MM/YY): ");
                 String creditCardExpiry = scanner.nextLine();
                 while (!creditCardExpiry.matches("(0[1-9]|1[0-2])/(\\d{2})")) { // Validate expiry date format
@@ -1158,10 +1174,10 @@ public class CustomerController {
                     System.out.print("Enter Card Expiry Date (MM/YY): ");
                     creditCardExpiry = scanner.nextLine();
                 }
-
+    
                 System.out.print("Enter Cardholder Name: ");
                 String creditCardHolderName = scanner.nextLine();
-
+    
                 System.out.print("Enter CVV (3 digits): ");
                 String creditCardCVV = scanner.nextLine();
                 while (!creditCardCVV.matches("\\d{3}")) { // Validate CVV (3 digits)
@@ -1169,10 +1185,10 @@ public class CustomerController {
                     System.out.print("Enter CVV (3 digits): ");
                     creditCardCVV = scanner.nextLine();
                 }
-
+    
                 payment = new CreditCardPayment(totalPrice, creditCardNumber, creditCardExpiry, creditCardHolderName, creditCardCVV);
                 break;
-            case 3: //debit card
+            case 3: // Debit Card
                 System.out.print("Enter Debit Card Number: ");
                 String debitCardNumber = scanner.nextLine();
                 while (!debitCardNumber.matches("\\d{16}")) { // Validate card number (16 digits)
@@ -1180,7 +1196,7 @@ public class CustomerController {
                     System.out.print("Enter Debit Card Number: ");
                     debitCardNumber = scanner.nextLine();
                 }
-
+    
                 System.out.print("Enter Card Expiry Date (MM/YY): ");
                 String debitCardExpiry = scanner.nextLine();
                 while (!debitCardExpiry.matches("(0[1-9]|1[0-2])/(\\d{2})")) { // Validate expiry date format
@@ -1188,10 +1204,10 @@ public class CustomerController {
                     System.out.print("Enter Card Expiry Date (MM/YY): ");
                     debitCardExpiry = scanner.nextLine();
                 }
-
+    
                 System.out.print("Enter Cardholder Name: ");
                 String debitCardHolderName = scanner.nextLine();
-
+    
                 System.out.print("Enter CVV (3 digits): ");
                 String debitCardCVV = scanner.nextLine();
                 while (!debitCardCVV.matches("\\d{3}")) { // Validate CVV (3 digits)
@@ -1199,7 +1215,7 @@ public class CustomerController {
                     System.out.print("Enter CVV (3 digits): ");
                     debitCardCVV = scanner.nextLine();
                 }
-
+    
                 payment = new DebitCardPayment(totalPrice, debitCardNumber, debitCardExpiry, debitCardHolderName, debitCardCVV);
                 break;
             case 0:
@@ -1219,7 +1235,6 @@ public class CustomerController {
             String transactionId = generateTransactionId();
     
             // Save the transaction details to a file
-            // Save the transaction details to a file
             try (BufferedWriter bw = new BufferedWriter(new FileWriter("transactions.txt", true))) {
                 String transactionDetails = transactionId + "|" + loggedInCustomer.getCustomerId() + "|" + payment.getPaymentMethod() + "|" + totalPrice + "|" + new Date();
                 bw.write(transactionDetails);
@@ -1228,9 +1243,35 @@ public class CustomerController {
             } catch (IOException e) {
                 System.out.println("[Error saving transaction details: " + e.getMessage() + "]");
             }
+    
+            // Ask user to return to main menu or exit
+            int postPaymentChoice;
+            do {
+                System.out.println("\nWhat would you like to do next?");
+                System.out.println("[1] Return to Main Menu");
+                System.out.println("[0] Exit");
+                System.out.print("Please choose an option: ");
+                if (scanner.hasNextInt()) {
+                    postPaymentChoice = scanner.nextInt();
+                    scanner.nextLine(); // Consume the newline
+                    if (postPaymentChoice == 1) {
+                        System.out.println("\n[Returning to Main Menu...]\n");
+                        runCustMainMenu();
+                        return;
+                    } else if (postPaymentChoice == 0) {
+                        System.out.println("Goodbye! Thanks for using our system!");
+                        System.exit(0);
+                    } else {
+                        System.out.println("[Invalid option. Please enter 1 or 0.]");
+                    }
+                } else {
+                    System.out.println("[Invalid input. Please enter a number.]");
+                    scanner.nextLine(); // Clear invalid input
+                }
+            } while (true);
         }
     }
-    
+
     private String generateTransactionId() {
         File file = new File("payments.txt");
         int id = 1; // Start with ID 1 if the file is empty
