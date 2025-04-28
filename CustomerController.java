@@ -280,6 +280,10 @@ public class CustomerController {
                     TransactionController.displayTransactionsByCustomerId(loggedInCustomer.getCustomerId());
                     showPostCheckoutOptions();
                     break;
+                case 9:
+                    System.out.println("\n[Log Out selected]\n");
+                    logout();
+                    break;
                 case 55:  //replay customer main menu
                     displayCustMainMenu();
                     break;
@@ -292,6 +296,13 @@ public class CustomerController {
                     break;
             }
         }while (choice != 0);
+    }
+
+    //log out
+    public void logout(){
+        System.out.println("[Logging out...]\n");
+        loggedInCustomer = null;
+        displayLoginRegisterMenu();
     }
 
     //view customer profile
@@ -1237,6 +1248,7 @@ public class CustomerController {
         System.out.println("|| [6] Check-in                               || ");
         System.out.println("|| [7] Check-out                              || ");
         System.out.println("|| [8] Check Transaction History              || ");
+        System.out.println("|| [9] Log Out                                || ");
         System.out.println("|| [0] Exit                                   || ");
         System.out.println("================================================");
     }
@@ -1416,7 +1428,7 @@ public class CustomerController {
                         String.format("|| %-20s: %-20s ||\n", "Payment Method", paymentMethod) +
                         String.format("|| %-20s: RM %-17f ||\n", "Total Price", totalPrice) +
                         String.format("|| %-20s: %-20s ||\n", "Date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) +
-                        "================================================\n";
+                        "================================================";
 
     System.out.println(receipt);
     
