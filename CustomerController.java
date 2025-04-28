@@ -292,12 +292,6 @@ public class CustomerController {
                     break;
                 case 9:
                     clearScreen();
-                    TransactionController transactionController = new TransactionController();
-                    System.out.println("\n[Check Transaction History selected]\n");
-                    transactionController.displayTransactionsByCustomerId(loggedInCustomer.getCustomerId());
-                    break;
-                case 10:
-                    clearScreen();
                     System.out.println("\n[Log Out selected]\n");
                     logout();
                     break;
@@ -1296,7 +1290,7 @@ public class CustomerController {
         }
     }
 
-    private void showPostCheckoutOptions() {
+    public void showPostCheckoutOptions() {
         int checkoutChoice;
         do {
             System.out.println("\nPlease choose an option:");
@@ -1532,8 +1526,7 @@ public class CustomerController {
         System.out.println("|| [6] Cancel Booking                         || ");
         System.out.println("|| [7] Check-in                               || ");
         System.out.println("|| [8] Check-out                              || ");
-        System.out.println("|| [9] Check Transaction History              || ");
-        System.out.println("|| [10] Log Out                               || ");
+        System.out.println("|| [9] Log Out                               || ");
         System.out.println("|| [0] Exit                                   || ");
         System.out.println("================================================");
     }
