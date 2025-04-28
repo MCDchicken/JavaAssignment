@@ -292,8 +292,9 @@ public class CustomerController {
                     break;
                 case 9:
                     clearScreen();
+                    TransactionController transactionController = new TransactionController();
                     System.out.println("\n[Check Transaction History selected]\n");
-                    TransactionController.displayTransactionsByCustomerId(loggedInCustomer.getCustomerId());
+                    transactionController.displayTransactionsByCustomerId(loggedInCustomer.getCustomerId());
                     break;
                 case 10:
                     clearScreen();
@@ -1034,6 +1035,7 @@ public class CustomerController {
                 if (booking.getCustomerId().equals(loggedInCustomer.getCustomerId())) {
                     hasBookings = true;
                     System.out.printf("|| %-16s : %-28s ||\n", "Booking ID", booking.getBookingId());
+                    System.out.printf("|| %-16s : %-28s ||\n", "Room Number", booking.getSelectedRoomNumber());
                     System.out.printf("|| %-16s : %-28s ||\n", "Room Type", booking.getRoomType());
                     System.out.printf("|| %-16s : %-28d ||\n", "Nights", booking.getNights());
                     System.out.printf("|| %-16s : RM %-25.2f ||\n", "Total Price", booking.getTotalPrice());
@@ -1061,52 +1063,44 @@ public class CustomerController {
 
     //check-in
     public void custCheckIn() {
+        if (loggedInCustomer == null) {
+            System.out.println("\n[Please log in to check in.]\n");
+            return;
+        }
+    
         System.out.println("Your Pending Bookings for Check-in:");
         File file = new File(BOOKINGS_FILE);
         if (!file.exists()) {
             System.out.println("\n[No bookings found]\n");
-            showPostCheckoutOptions(); // Show options to return to the main menu or exit
+            showPostCheckoutOptions();
             return;
         }
     
-        StringBuilder pendingBookings = new StringBuilder();
+        List<String[]> pendingBookings = new ArrayList<>();
         int bookingCount = 0;
     
         try (BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] parts = line.split("\\|"); // Use "|" as the delimiter
-                if (parts.length == 9) { // Ensure the line has exactly 9 parts
-                    String bookingCustomerId = parts[1];
-                    String roomType = parts[2];
-                    //tring nights = parts[3];
-                    //String totalPrice = parts[4];
-                    String status = parts[5];
-                    String checkInDate = parts[6];
-                    String checkOutDate = parts[7];
-                    String roomNumber = parts[8];
-    
-                    // Check if the booking belongs to the logged-in customer and is pending
-                    if (bookingCustomerId.equals(loggedInCustomer.getCustomerId()) && status.equals("PENDING")) {
-                        bookingCount++;
-                        pendingBookings.append(String.format("[%d] Booking ID: %s | Room: %s | Room Number: %s | Check-In: %s | Check-Out: %s\n",
-                                bookingCount, parts[0], roomType, roomNumber, checkInDate, checkOutDate));
-                    }
+                String[] parts = line.split("\\|");
+                if (parts.length == 9 && parts[1].equals(loggedInCustomer.getCustomerId()) && parts[5].equals("PENDING")) {
+                    pendingBookings.add(parts);
+                    bookingCount++;
+                    System.out.printf("[%d] Booking ID: %s | Room: %s | Room Number: %s | Check-In: %s | Check-Out: %s\n",
+                            bookingCount, parts[0], parts[2], parts[8], parts[6], parts[7]);
                 }
             }
         } catch (IOException e) {
             System.out.println("\n[Error reading bookings: " + e.getMessage() + "]\n");
-            showPostCheckoutOptions(); // Show options to return to the main menu or exit
+            showPostCheckoutOptions();
             return;
         }
     
         if (bookingCount == 0) {
             System.out.println("\n[No pending bookings available for check-in.]\n");
-            showPostCheckoutOptions(); // Show options to return to the main menu or exit
+            showPostCheckoutOptions();
             return;
         }
-    
-        System.out.println(pendingBookings.toString());
     
         int choice;
         while (true) {
@@ -1126,28 +1120,22 @@ public class CustomerController {
         }
     
         if (choice == 0) {
-            clearScreen();
-            System.out.println("\n[Check-in cancelled.]\n");
-            showPostCheckoutOptions(); // Show options to return to the main menu or exit
+            System.out.println("\n[Check-in cancelled. Returning to Customer Main Menu.]\n");
+            runCustMainMenu();
             return;
         }
     
-        // Update the selected booking to CHECKED_IN
+        String[] selectedBooking = pendingBookings.get(choice - 1);
+        selectedBooking[5] = "CHECKED_IN";
+    
         try {
             StringBuilder newFileContent = new StringBuilder();
             BufferedReader br = new BufferedReader(new FileReader(BOOKINGS_FILE));
             String line;
-            int currentIndex = 0;
-            int targetIndex = choice - 1; // User's selection (1-based index)
-    
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split("\\|");
-                if (parts.length == 9) {
-                    if (currentIndex == targetIndex) {
-                        parts[5] = "CHECKED_IN"; // Update status to CHECKED_IN
-                        line = String.join("|", parts); // Reconstruct the line
-                    }
-                    currentIndex++;
+                if (parts.length == 9 && parts[0].equals(selectedBooking[0])) {
+                    line = String.join("|", selectedBooking);
                 }
                 newFileContent.append(line).append("\n");
             }
@@ -1160,10 +1148,11 @@ public class CustomerController {
             System.out.println("\n[Check-in successful!]");
         } catch (IOException e) {
             System.out.println("\n[Error updating booking status: " + e.getMessage() + "]\n");
-            return; // Exit the method if an error occurs
+            showPostCheckoutOptions();
+            return;
         }
     
-        showPostCheckoutOptions(); // Show options to return to the main menu or exit
+        showPostCheckoutOptions();
     }
 
     //check-out
@@ -1298,10 +1287,11 @@ public class CustomerController {
         }
 
         if(feedbackChoice == 1){
+            clearScreen();
             FeedbackSupport feedbackSupport = new FeedbackSupport();
-            feedbackSupport.promptComplaint();
+            feedbackSupport.promptComplaintCust();
         }else{
-            System.out.println("\n[Goodbye! Thank you for your stay!]");
+            System.out.println("\n[Goodbye!Thank you for your stay!]");
             System.exit(0);
         }
     }
