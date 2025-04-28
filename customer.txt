@@ -1,0 +1,5 @@
+CUST1|jhieying|Ng Jhie Ying|123456A|0123456789|jhieying@gmail.com
+CUST2|nugget|nuggetdog|123456A|0123456789|nugget@gmail.com
+CUST3|nug|nnn|123456A|0123456789|jjj@gmail.com
+CUST4|hhh|ghh|123456A|0123456789|123@gmail.com
+CUST5|hhhhjsachkj|1h|123456A|0123456789|jhu@gmail.com

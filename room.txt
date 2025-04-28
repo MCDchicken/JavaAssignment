@@ -1,0 +1,25 @@
+101|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+102|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+103|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+104|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+105|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+106|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+107|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+108|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+109|1|Standard Room|150|A simple room with essential amenities for solo travelers or couples.|Occupied
+111|2|Deluxe Room|250|A more spacious and upgraded room with additional amenities.|Occupied
+112|2|Deluxe Room|250|A more spacious and upgraded room with additional amenities.|Occupied
+113|2|Deluxe Room|250|A more spacious and upgraded room with additional amenities.|Occupied
+114|2|Deluxe Room|250|A more spacious and upgraded room with additional amenities.|Occupied
+121|3|Family Room|350|A larger room with multiple beds, ideal for families or small groups.|Available
+122|3|Family Room|350|A luxurious room with separate living and sleeping areas.|Occupied
+123|3|Family Room|350|A luxurious room with separate living and sleeping areas.|Available
+124|3|Family Room|350|A luxurious room with separate living and sleeping areas.|Available
+131|5|Suite|600|Designed for business travelers, featuring a workspace and premium amenities.|Occupied
+132|5|Suite|600|Designed for business travelers, featuring a workspace and premium amenities.|Occupied
+133|5|Suite|600|A luxurious room with separate living and sleeping areas.|Available
+134|5|Suite|600|A larger room with multiple beds, ideal for families or small groups.|Occupied
+141|2|Executive Room|350|A larger room with multiple beds, ideal for families or small groups.|Occupied
+142|2|Executive Room|350|A luxurious room with separate living and sleeping areas.|Occupied
+143|2|Executive Room|350|Designed for business travelers, featuring a workspace and premium amenities.|Occupied
+144|2|Executive Room|350|Designed for business travelers, featuring a workspace and premium amenities.|Available
