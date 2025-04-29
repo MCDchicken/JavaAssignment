@@ -47,8 +47,16 @@ public class HotelMainMenu {
     }
 
     public static void displayHotelMenu() {
+        System.out.println(
+            "___  ___ _____ _____  _    _  ___  _____   ___ _____ _____ _____ _   _  \n" +
+            "|  \\/  ||  ___|  _  || |  | |/ _ \\/  __ \\/ _ \\_   _|_   _|  _  | \\ | | \n" +
+            "| .  . || |__ | | | || |  | / /_\\ \\ /  \\/ /_\\ \\| |   | | | | | |  \\| | \n" +
+            "| |\\/| ||  __|| | | || |/\\| |  _  | |    |  _  | |   | | | | | | . ` | \n" +
+            "| |  | || |___\\ \\_/ /\\  /\\  / | | | \\__/\\| | | | |  _| |_\\ \\_/ / |\\  | \n" +
+            "\\_|  |_\\/____/ \\___/  \\/  \\/\\_| |_\\/____/\\_| |_\\/_/ \\___/ \\___/\\_| \\_/ \n");
+    
         System.out.println("================================================");
-        System.out.println("||     WELCOME TO HOTEL MANAGEMENT SYSTEM     ||");
+        System.out.println("||        WELCOME TO MEOWACATION HOTEL        ||");
         System.out.println("================================================");
         System.out.println("||                 MAIN MENU                  ||");
         System.out.println("================================================");
@@ -57,4 +65,7 @@ public class HotelMainMenu {
         System.out.println("|| [0] Exit                                   ||");
         System.out.println("================================================");
     }
+    
+    
+    
 }
