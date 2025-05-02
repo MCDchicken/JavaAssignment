@@ -1,0 +1,26 @@
+101|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Occupied
+102|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+103|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Occupied
+104|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+105|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+106|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+107|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+108|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+109|1|Standard Room|A simple room with essential amenities for solo travelers or couples.|150.00|Available
+111|2|Deluxe Room|A more spacious and upgraded room with additional amenities.|250.00|Available
+112|2|Deluxe Room|A more spacious and upgraded room with additional amenities.|250.00|Available
+113|2|Deluxe Room|A more spacious and upgraded room with additional amenities.|250.00|Available
+114|2|Deluxe Room|A more spacious and upgraded room with additional amenities.|250.00|Available
+121|3|Family Room|A larger room with multiple beds, ideal for families or small groups.|350.00|Available
+122|3|Family Room|A luxurious room with separate living and sleeping areas.|350.00|Occupied
+123|3|Family Room|A luxurious room with separate living and sleeping areas.|350.00|Occupied
+124|3|Family Room|A luxurious room with separate living and sleeping areas.|350.00|Available
+131|5|Suite|Designed for business travelers, featuring a workspace and premium amenities.|600.00|Available
+132|5|Suite|Designed for business travelers, featuring a workspace and premium amenities.|600.00|Occupied
+133|5|Suite|A luxurious room with separate living and sleeping areas.|600.00|Available
+134|5|Suite|A larger room with multiple beds, ideal for families or small groups.|600.00|Available
+141|2|Executive Room|A larger room with multiple beds, ideal for families or small groups.|350.00|Available
+142|2|Executive Room|A luxurious room with separate living and sleeping areas.|350.00|Available
+143|2|Executive Room|Designed for business travelers, featuring a workspace and premium amenities.|350.00|Available
+144|2|Executive Room|Designed for business travelers, featuring a workspace and premium amenities.|350.00|Available
+145|3|Family Room|A simple room with essential amenities for solo travelers or couples.|100000.00|Occupied
